@@ -75,6 +75,7 @@ function render(report: DoctorReport, details: boolean): void {
       : safe`  ${report.sessionCount} ${noun}\n`,
   );
   out(safe`  ${report.archiveCount} archive${report.archiveCount === 1 ? "" : "s"}\n`);
+  headline(report);
 
   if (report.findings.length === 0) {
     out("\n  ✓ Nothing to report.\n\n");
@@ -114,6 +115,54 @@ function render(report: DoctorReport, details: boolean): void {
   }
   if (!details) out("  Run 'termstash doctor --details' to see the paths.\n");
   out("\n");
+}
+
+/**
+ * What the reader came to find out, before the classified list.
+ *
+ * Restates two findings as sentences with a next step, and adds nothing the
+ * findings do not already say. On a partial scan the first line is left out:
+ * a session with no transcript we could see is then not one we know is gone,
+ * and the finding below already words it that way.
+ */
+export function headline(report: DoctorReport): void {
+  const { lost, atRisk, atRiskWithoutArchive } = report.headline;
+  const lines: string[] = [];
+
+  if (lost > 0 && !report.scanPartial) {
+    // Two short lines rather than one long one: this is the sentence the
+    // command is run for, and at 120 columns it wrapped mid-clause.
+    lines.push(safe`At least ${lost} session${lost === 1 ? " is" : "s are"} no longer resumable.`);
+    lines.push(
+      lost === 1
+        ? "Its transcript is gone; only the prompts survive in Claude's history."
+        : "Their transcripts are gone; only the prompts survive in Claude's history.",
+    );
+  }
+  if (atRisk > 0) {
+    // "more" only when it follows the lost count; on its own it reads as
+    // more than something the reader was never told.
+    const more = lines.length > 0 ? " more" : "";
+    if (lines.length > 0) lines.push("");
+    lines.push(safe`${atRisk}${more} ${atRisk === 1 ? "is" : "are"} approaching Claude's retention cutoff.`);
+    // Said positively, because the first version of this line read "none of
+    // them has no archive" - a double negative on the one sentence about
+    // whether anything is protected.
+    lines.push(
+      atRiskWithoutArchive === 0
+        ? `${atRisk === 1 ? "It is" : "All of them are"} archived.`
+        : atRiskWithoutArchive === atRisk
+          ? `${atRisk === 1 ? "It is not" : "None of them is"} archived.`
+          : safe`${atRiskWithoutArchive} of them ${atRiskWithoutArchive === 1 ? "is" : "are"} not archived.`,
+    );
+  }
+  if (lines.length === 0) return;
+
+  out("\n");
+  for (const line of lines) out(line === "" ? "\n" : `  ${line}\n`);
+  if (atRiskWithoutArchive > 0) {
+    out("\n  termstash list --at-risk    see which ones\n  termstash pin <id>          keep one\n");
+  }
 }
 
 /** Only a confirmed problem is worth a non-zero exit; noticing is not failing. */

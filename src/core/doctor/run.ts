@@ -490,10 +490,16 @@ export async function runDoctor(input: DoctorInput): Promise<DoctorReport> {
       quarantined.map((q) => q.dir));
   }
 
+  const archivedIds = new Set(archives.map((a) => a.sessionId));
   return {
     sessionCount: sessions.length,
     archiveCount: archives.length,
     scanPartial: partial,
+    headline: {
+      lost: input.history?.lost.length ?? 0,
+      atRisk: atRisk.length,
+      atRiskWithoutArchive: atRisk.filter((s) => !archivedIds.has(s.id)).length,
+    },
     findings,
   };
 }

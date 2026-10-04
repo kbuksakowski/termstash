@@ -9,10 +9,25 @@ Local-first. Open source. No account.
 
 Those two marked ⚠ are gone within days unless something keeps a copy. That is what this does.
 
-> **Status:** all commands work, verified by hand against a real 208-session corpus on macOS
-> and by CI on macOS and Linux. Not published to npm yet — run it from source, below.
-> Every number in this file is a measurement, taken on 2026-10-04; they move as the machine
-> they were taken on does.
+**See what you have already lost** — it reads, it writes nothing:
+
+```
+$ npx termstash doctor
+
+  At least 1876 sessions are no longer resumable.
+  Their transcripts are gone; only the prompts survive in Claude's history.
+
+  48 more are approaching Claude's retention cutoff.
+  None of them is archived.
+
+  termstash list --at-risk    see which ones
+  termstash pin <id>          keep one
+```
+
+That output is from the machine this was built on. Yours will have its own numbers.
+
+> **Status:** 0.1.0. macOS and Linux, Claude Code 2.1.269 to 2.1.289, CI on Node 20 and 22.
+> Every number in this file is a measurement taken on 2026-10-04.
 
 ---
 
@@ -28,22 +43,37 @@ the transcripts needed to resume them were gone, and nothing had ever said so. *
 because the count includes only records Claude tagged with a session id; the rest cannot be
 attributed and are reported separately.
 
+### Why not just raise `cleanupPeriodDays`?
+
+Do raise it — it helps. It is not a guarantee, and Claude Code's own issue tracker says so:
+
+- [#41458](https://github.com/anthropics/claude-code/issues/41458) — `cleanupPeriodDays: 99999`,
+  verified in a dotfiles backup every hour since January, and 490 sessions deleted anyway.
+- [#59248](https://github.com/anthropics/claude-code/issues/59248) and
+  [#90371](https://github.com/anthropics/claude-code/issues/90371) — sessions younger than the
+  documented 30 days missing.
+
+A setting decides when Claude deletes. A copy outside the directory Claude manages is the only
+thing that decides whether the conversation survives it.
+
 ## Install
 
 Node 20.11 or newer.
 
 ```bash
-git clone https://github.com/kbuksakowski/termstash.git
-cd termstash
-npm install
-npm run build
-node dist/cli.js list
+npm install -g termstash
+termstash list
 ```
 
-That last line is the whole first run — it reads what is already on your machine and writes
-nothing. To use it as `termstash`, link it: `npm link`.
+`list`, `search` and `doctor` only read what is already on your machine. Nothing is written
+until you `pin`, `unpin`, `archive`, `restore`, `rename` or install the hook.
 
-Once it is on npm this becomes `npm install -g termstash`.
+From source:
+
+```bash
+git clone https://github.com/kbuksakowski/termstash.git
+cd termstash && npm install && npm run build && npm link
+```
 
 ## What it does
 
