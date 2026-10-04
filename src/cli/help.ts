@@ -31,7 +31,7 @@ Options for list
   --at-risk            Only sessions approaching Claude's retention cutoff
   --pinned             Only pinned sessions
   --limit <n>          Show at most n sessions
-  --json               Emit the normalized session records as JSON
+  --json               Emit sessions as JSON, with what could not be read
 
 Options for resume
   --cwd <dir>          Working directory, required when the original is gone
@@ -51,7 +51,8 @@ Options for doctor
   --json               Emit the report as JSON
 
 Options for archive and restore
-  --replace            archive: refresh an archive that is behind the transcript
+  --replace            archive: replace an archive that differs from the transcript;
+                       the old one is kept in quarantine
                        restore: displace an existing transcript into quarantine
 
 Global

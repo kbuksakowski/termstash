@@ -30,13 +30,14 @@ First working release. Verified against Claude Code 2.1.269 and 2.1.289 on macOS
 - `termstash rename <id> <title>` — give a session a title you will recognise, from the list
   rather than from inside it. Claude names a session after its first prompt, so half of them
   end up called `/commit`. The title is TermStash's own; the transcript is never touched.
-- `termstash doctor` — findings classed as confirmed, potential or informational; exits
-  non-zero only on a confirmed one. Leads with two numbers before the
-  list: sessions already beyond recovery, and sessions approaching the cutoff with no archive.
+- `termstash doctor` — leads with two numbers: sessions already beyond recovery, and sessions
+  approaching the cutoff with no archive. Below them, findings classed as confirmed, potential
+  or informational; exits non-zero only on a confirmed one.
 - `termstash hook install` — `Stop` and `SessionEnd` hooks that keep a pinned session's archive
   current, closing the window where a pin is no longer protection. `Stop` fires after every
-  turn and survives a killed terminal; refreshes copy only the bytes added since the last one.
-  Touches only pinned sessions, prints nothing, and cannot fail a turn or an exit.
+  turn and survives a killed terminal. A refresh is a full verified copy, and only when the
+  transcript has changed. Touches only pinned sessions, prints nothing, and cannot fail a turn
+  or an exit.
 
 ### Notes
 

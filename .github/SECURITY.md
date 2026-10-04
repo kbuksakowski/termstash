@@ -19,11 +19,11 @@ signed-in user's email address, which Claude writes into every session's context
 causes TermStash to copy, print or transmit that content somewhere unintended is a security
 bug, even if nothing crashes.
 
-**It writes in exactly four places**, all under directories it owns or was pointed at:
+**It writes in exactly five places**, all under directories it owns or was pointed at:
 
 ```
 ~/.termstash/archive/      copies of transcripts
-~/.termstash/quarantine/   transcripts displaced by `restore --replace`
+~/.termstash/quarantine/   anything displaced rather than deleted
 ~/.termstash/metadata.json pins and titles
 ~/.claude/projects/…       only `restore`, writing back a session Claude deleted
 ~/.claude/settings.json    only `hook install`, adding two entries
@@ -42,8 +42,10 @@ TermStash opening a socket, that is a bug worth reporting.
   encrypted — anyone who can read your `~/.claude` can already read the originals.
 - `list --json` and `search --json` emit untruncated transcript-derived text. That is what
   makes them scriptable; treat their output as sensitive.
-- `restore --replace` moves a transcript into quarantine rather than deleting it, and nothing
-  ever prunes that directory. Disk use grows only when you ask for it.
+- Nothing TermStash displaces is deleted. A transcript `restore --replace` would overwrite, an
+  archive `archive --replace` would overwrite, and an archive TermStash can no longer read all
+  go into quarantine, and nothing ever prunes that directory. Its disk use grows only through
+  commands you run.
 
 ## Scope
 

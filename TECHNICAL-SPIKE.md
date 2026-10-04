@@ -639,6 +639,15 @@ sessions under 500 ms, searches project/branch/message text), `borball/claude-se
 `hex/claude-sessions`. **Nobody appears to own archive/restore against the 30-day sweep, or
 the `history.jsonl` graveyard.** That — not `list`/`search` — is the gap this leaves open.
 
+> **Correction 2026-10-04.** That sentence is no longer true as written. `agentsview` and
+> `ccrider` now keep session content in their own databases, outside the sweep, so the
+> conversation survives to be *read*. What neither does, checked against their READMEs: put a
+> transcript back where Claude looks for it, so `claude --resume` works again. ccrider's own
+> advice for keeping sessions resumable is to set `cleanupPeriodDays` to 99999 — which
+> [anthropics/claude-code#41458](https://github.com/anthropics/claude-code/issues/41458) shows
+> does not reliably hold. The gap is narrower than this section claimed: not keeping the
+> record, but keeping it resumable.
+
 ---
 
 ## 10. Recommended implementation approach

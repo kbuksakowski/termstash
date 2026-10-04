@@ -11,7 +11,8 @@ What helps most is an issue:
 
 - **A bug.** The command you ran, what it printed, and what you expected. `termstash doctor
   --json` and your Claude Code version (`claude --version`) usually answer the first question
-  before it is asked. Leave out transcript content — paths and ids are enough.
+  before it is asked. Leave out transcript content — paths and ids are enough. Its output
+  names your project directories; replace any you would rather not publish.
 - **Something that should exist.** What you were trying to do when you missed it. That is worth
   more than a design.
 - **A comment you could not follow.** See below.
