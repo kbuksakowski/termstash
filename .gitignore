@@ -1,0 +1,11 @@
+node_modules/
+dist/
+coverage/
+*.tsbuildinfo
+.DS_Store
+
+# Transcript-shaped files named by session id, at the repository root. A
+# measurement harness run from here left ten of them behind and `git add -A`
+# committed them in round four. Synthetic, but nothing about their shape says
+# so, and in a public repository a file named like a session reads as one.
+/[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*

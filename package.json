@@ -1,0 +1,53 @@
+{
+  "name": "termstash",
+  "version": "0.1.0",
+  "description": "Your Claude Code sessions expire. Keep the important ones.",
+  "license": "MIT",
+  "type": "module",
+  "engines": {
+    "node": ">=20.11"
+  },
+  "bin": {
+    "termstash": "dist/cli.js"
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "prepublishOnly": "npm run build && npm test",
+    "dev": "tsup --watch",
+    "test": "vitest run",
+    "smoke": "npm run build && node scripts/smoke-test.mjs",
+    "test:watch": "vitest",
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/node": "^20.14.0",
+    "tsup": "^8.5.1",
+    "typescript": "^5.6.3",
+    "vitest": "^4.1.11"
+  },
+  "author": "Kamil Buksakowski <oss@kamilbuksakowski.dev>",
+  "homepage": "https://github.com/kbuksakowski/termstash#readme",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/kbuksakowski/termstash.git"
+  },
+  "bugs": {
+    "url": "https://github.com/kbuksakowski/termstash/issues"
+  },
+  "keywords": [
+    "claude",
+    "claude-code",
+    "cli",
+    "session",
+    "session-manager",
+    "archive",
+    "backup",
+    "transcript",
+    "local-first"
+  ]
+}
