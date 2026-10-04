@@ -22,7 +22,8 @@
     "test": "vitest run",
     "smoke": "npm run build && node scripts/smoke-test.mjs",
     "test:watch": "vitest",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepack": "npm run build"
   },
   "devDependencies": {
     "@types/node": "^20.14.0",
