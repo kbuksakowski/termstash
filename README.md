@@ -5,7 +5,7 @@
 Find, resume and safely archive Claude Code sessions.
 Local-first. Open source. No account.
 
-<img src=".github/assets/list.gif" alt="termstash list showing sessions with protection, live and retention markers" width="820">
+<img src="https://raw.githubusercontent.com/kbuksakowski/termstash/main/.github/assets/list.gif" alt="termstash list showing sessions with protection, live and retention markers" width="820">
 
 Those two marked ⚠ are gone within days unless something keeps a copy. That is what this does.
 
@@ -104,7 +104,7 @@ Claude deletes a transcript and the conversation is gone — unless TermStash ha
 copy. `restore` puts it back where Claude looks for it, and `resume` picks the conversation up
 where it stopped:
 
-<img src=".github/assets/restore.gif" alt="pinning a session, deleting its transcript as Claude's sweep would, and restoring it" width="820">
+<img src="https://raw.githubusercontent.com/kbuksakowski/termstash/main/.github/assets/restore.gif" alt="pinning a session, deleting its transcript as Claude's sweep would, and restoring it" width="820">
 
 The `rm` in that recording stands in for Claude's 30-day sweep — it does exactly what Claude
 would do a month later. The archive exists because of the `pin` on the first line. A session
@@ -116,7 +116,7 @@ you never pinned is not recoverable; `search` will still find its prompts and sa
 sweep and therefore outlives the transcripts it refers to. A query can turn up work whose
 conversation is long gone:
 
-<img src=".github/assets/search.gif" alt="termstash search finding sessions whose transcripts Claude already deleted" width="820">
+<img src="https://raw.githubusercontent.com/kbuksakowski/termstash/main/.github/assets/search.gif" alt="termstash search finding sessions whose transcripts Claude already deleted" width="820">
 
 An archived session is listed separately as `ARCHIVED — RESTORABLE`, with the command to bring
 it back. `doctor` reports the total the same way — as a floor, never a count:
@@ -306,17 +306,17 @@ TermStash reads Claude Code's own storage and delegates execution back to Claude
 reimplement conversations, and it does not modify Claude's transcripts.
 
 Everything it relies on was verified experimentally rather than assumed — see
-[`TECHNICAL-SPIKE.md`](TECHNICAL-SPIKE.md) for the filesystem layout, the record schemas, the
+[`TECHNICAL-SPIKE.md`](https://github.com/kbuksakowski/termstash/blob/main/TECHNICAL-SPIKE.md) for the filesystem layout, the record schemas, the
 resume and cleanup behavior, and the eleven experiments that established them.
 
 ## Documentation
 
 | Document | Purpose |
 |---|---|
-| [`TECHNICAL-SPIKE.md`](TECHNICAL-SPIKE.md) | How Claude Code stores sessions, and the experiments behind every claim made here |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to report a problem, what is out of scope, building from source |
-| [`.github/SECURITY.md`](.github/SECURITY.md) | What TermStash reads and writes, and how to report something sensitive |
-| [`CHANGELOG.md`](CHANGELOG.md) | What changed, per release |
+| [`TECHNICAL-SPIKE.md`](https://github.com/kbuksakowski/termstash/blob/main/TECHNICAL-SPIKE.md) | How Claude Code stores sessions, and the experiments behind every claim made here |
+| [`CONTRIBUTING.md`](https://github.com/kbuksakowski/termstash/blob/main/CONTRIBUTING.md) | How to report a problem, what is out of scope, building from source |
+| [`.github/SECURITY.md`](https://github.com/kbuksakowski/termstash/blob/main/.github/SECURITY.md) | What TermStash reads and writes, and how to report something sensitive |
+| [`CHANGELOG.md`](https://github.com/kbuksakowski/termstash/blob/main/CHANGELOG.md) | What changed, per release |
 
 ## If it earns it
 
@@ -330,14 +330,14 @@ the ones who do not yet know their sessions are disappearing.
 Bugs and ideas: [issues](https://github.com/kbuksakowski/termstash/issues).
 
 Anything that could expose someone's transcript content goes to **oss@kamilbuksakowski.dev**
-instead of a public issue — see [`.github/SECURITY.md`](.github/SECURITY.md) for what counts
+instead of a public issue — see [`.github/SECURITY.md`](https://github.com/kbuksakowski/termstash/blob/main/.github/SECURITY.md) for what counts
 and what TermStash actually touches.
 
 ## Contributing
 
-Issues are welcome; pull requests are not accepted. [`CONTRIBUTING.md`](CONTRIBUTING.md) says
+Issues are welcome; pull requests are not accepted. [`CONTRIBUTING.md`](https://github.com/kbuksakowski/termstash/blob/main/CONTRIBUTING.md) says
 why, and what makes an issue most useful.
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT — see [`LICENSE`](https://github.com/kbuksakowski/termstash/blob/main/LICENSE).
