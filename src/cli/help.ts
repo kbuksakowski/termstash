@@ -18,6 +18,7 @@ Commands
   resume <id>          Resume a session in its original project directory
   rename <id> <title>  Give a session a title of your own
   pin <id>             Mark important and keep a verified archive of it
+  pin --at-risk        Pin every session approaching Claude's retention cutoff
   unpin <id>           Remove the mark; the archive is kept
   archive <id>         Copy a session outside Claude's cleanup lifecycle
   restore <id>         Bring an archived session back, duplicate-safe

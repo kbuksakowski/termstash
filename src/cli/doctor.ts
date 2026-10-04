@@ -161,7 +161,9 @@ export function headline(report: DoctorReport): void {
   out("\n");
   for (const line of lines) out(line === "" ? "\n" : `  ${line}\n`);
   if (atRiskWithoutArchive > 0) {
-    out("\n  termstash list --at-risk    see which ones\n  termstash pin <id>          keep one\n");
+    // One command, not one per session: the remedy used to be `pin <id>`,
+    // which asked a first-time reader to repeat it for every line of a list.
+    out("\n  termstash list --at-risk    see which ones\n  termstash pin --at-risk     keep all of them\n");
   }
 }
 

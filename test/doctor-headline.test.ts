@@ -23,7 +23,7 @@ describe("doctor's headline", () => {
     expect(text).toContain("At least 1878 sessions are no longer resumable.");
     expect(text).toContain("48 more are approaching Claude's retention cutoff.");
     expect(text).toContain("None of them is archived.");
-    expect(text).toContain("termstash pin <id>");
+    expect(text).toContain("termstash pin --at-risk");
   });
 
   it("never says a single unarchived session is archived", () => {

@@ -23,7 +23,8 @@ First working release. Verified against Claude Code 2.1.269 and 2.1.289 on macOS
 - `termstash archive <id>` / `termstash restore <id>` — verified copies outside Claude's
   cleanup lifecycle, with a duplicate-safe restore and a quarantine that is never pruned.
 - `termstash pin <id>` / `termstash unpin <id>` — pin means preserved: it creates, verifies or
-  refreshes an archive, and says plainly when a session is *not* protected.
+  refreshes an archive, and says plainly when a session is *not* protected. `pin --at-risk` does
+  it for every session approaching the cutoff at once, and says what it will copy first.
 - `termstash rename <id> <title>` — give a session a title you will recognise, from the list
   rather than from inside it. Claude names a session after its first prompt, so half of them
   end up called `/commit`. The title is TermStash's own; the transcript is never touched.

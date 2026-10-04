@@ -21,7 +21,7 @@ $ npx termstash doctor
   None of them is archived.
 
   termstash list --at-risk    see which ones
-  termstash pin <id>          keep one
+  termstash pin --at-risk     keep all of them
 ```
 
 That output is from the machine this was built on. Yours will have its own numbers.
@@ -222,6 +222,7 @@ termstash list --at-risk            # only sessions approaching the retention cu
 termstash search stripe             # titles, projects, prompts and replies
 termstash resume 7f31a2             # resume by short id, in the right project
 termstash pin 7f31a2                # mark important + keep a verified archive
+termstash pin --at-risk             # the same, for every session near the cutoff
 termstash archive 7f31a2            # a one-off copy, without marking the session
 termstash restore 7f31a2            # bring an archived session back, duplicate-safe
 termstash rename 7f31a2 "Stripe webhook"   # a title you'll recognise
