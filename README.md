@@ -314,7 +314,7 @@ resume and cleanup behavior, and the eleven experiments that established them.
 | Document | Purpose |
 |---|---|
 | [`TECHNICAL-SPIKE.md`](TECHNICAL-SPIKE.md) | How Claude Code stores sessions, and the experiments behind every claim made here |
-| [`CONTRIBUTING.md`](CONTRIBUTING.md) | Development setup, and the rules a change has to respect |
+| [`CONTRIBUTING.md`](CONTRIBUTING.md) | How to report a problem, what is out of scope, building from source |
 | [`.github/SECURITY.md`](.github/SECURITY.md) | What TermStash reads and writes, and how to report something sensitive |
 | [`CHANGELOG.md`](CHANGELOG.md) | What changed, per release |
 
@@ -335,8 +335,8 @@ and what TermStash actually touches.
 
 ## Contributing
 
-Start with [`CONTRIBUTING.md`](CONTRIBUTING.md). A first pull request also means signing the
-[ICLA](ICLA.md) — one line in `CONTRIBUTORS.md`, once.
+Issues are welcome; pull requests are not accepted. [`CONTRIBUTING.md`](CONTRIBUTING.md) says
+why, and what makes an issue most useful.
 
 ## License
 
