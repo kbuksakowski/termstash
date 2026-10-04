@@ -200,3 +200,23 @@ describe("ambiguous candidate list", () => {
     }
   });
 });
+
+describe("resume without a terminal", () => {
+  it("refuses, launches nothing, and gives the command to run in one", async () => {
+    // The suite itself runs without a TTY, which is exactly the situation an
+    // agent or a script is in. No launcher is injected, so this is the path
+    // that would otherwise spawn the real `claude --resume` into a pipe.
+    const project = mkdtempSync(join(tmpdir(), "termstash-resume-"));
+    const code = await resumeCommand(parseArgs(["resume", "91bc22"]), {
+      discover: discovery([session(C, { projectPath: project })]),
+      now: NOW,
+    });
+    // The refusal is returned before the launcher is reached, so this message
+    // and a launch cannot both happen. (ESM will not let `spawn` be spied on.)
+    expect(code).toBe(1);
+    expect(stderr()).toContain("Nothing was launched.");
+    expect(stderr()).toMatch(/has none - it is\nrunning inside an agent/);
+    expect(stderr()).toContain(`--resume ${C}`);
+    expect(stderr()).not.toContain("�");
+  });
+});

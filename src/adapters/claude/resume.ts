@@ -56,3 +56,24 @@ export const launchClaude: Launcher = async ({ sessionId, cwd }) => {
     });
   });
 };
+
+/**
+ * Whether there is a terminal to hand to Claude.
+ *
+ * Run from inside an agent or a script, stdin and stdout are pipes, and
+ * `claude --resume` was given no TTY - which at best fails and at worst waits
+ * on input nobody can type until the caller's timeout kills it.
+ */
+export function hasTerminal(): boolean {
+  return process.stdin.isTTY === true && process.stdout.isTTY === true;
+}
+
+/** The command to give someone who does have a terminal. */
+export function resumeCommandLine(sessionId: string, cwd: string): string {
+  return `cd ${shellQuote(cwd)} && ${CLAUDE_BINARY} --resume ${sessionId}`;
+}
+
+/** Quoted for a POSIX shell, so a path with spaces or quotes stays one argument. */
+function shellQuote(value: string): string {
+  return /^[A-Za-z0-9_./-]+$/.test(value) ? value : `'${value.replace(/'/g, "'\\''")}'`;
+}

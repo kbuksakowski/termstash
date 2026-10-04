@@ -2,7 +2,7 @@ import { stat } from "node:fs/promises";
 import { resolve as resolvePath } from "node:path";
 import { discoverSessions } from "../adapters/claude/discover.js";
 import type { Discovery } from "../adapters/claude/discover.js";
-import { launchClaude } from "../adapters/claude/resume.js";
+import { hasTerminal, launchClaude, resumeCommandLine } from "../adapters/claude/resume.js";
 import type { Launcher } from "../adapters/claude/resume.js";
 import type { Session } from "../core/session/types.js";
 import { assignShortIds, resolveShortId } from "../core/short-id/index.js";
@@ -103,6 +103,19 @@ export async function resumeCommand(args: ParsedArgs, deps: ResumeDeps = {}): Pr
 
   const cwd = await resolveWorkingDirectory(args, session, sessions);
   if (typeof cwd !== "string") return fail(cwd.error);
+
+  // Checked for the real launcher only: an injected one is a test standing in
+  // for Claude, and the question is whether Claude would get a terminal.
+  // Thrown, this message reached main() and lost its newlines to the
+  // sanitiser there; said here, it keeps them.
+  if (deps.launcher === undefined && !hasTerminal()) {
+    return fail(
+      "resume hands the terminal to Claude, and this process has none - it is\n" +
+        "running inside an agent, a script or a pipe. Nothing was launched.\n\n" +
+        "To resume it, run this in a terminal:\n" +
+        safe`  ${resumeCommandLine(session.id, cwd)}`,
+    );
+  }
 
   const launcher = deps.launcher ?? launchClaude;
   const { code } = await launcher({ sessionId: session.id, cwd });

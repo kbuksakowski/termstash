@@ -20,6 +20,8 @@ First working release. Verified against Claude Code 2.1.269 and 2.1.289 on macOS
 - `termstash resume <id>` — short-id expansion, launched in the session's own project
   directory. Refuses on an ambiguous id, a live session, or a missing project directory
   (`--cwd` makes that choice explicit).
+  Without a terminal to hand over — inside an agent, a script or a pipe — it refuses and
+  prints the command to run in one.
 - `termstash archive <id>` / `termstash restore <id>` — verified copies outside Claude's
   cleanup lifecycle, with a duplicate-safe restore and a quarantine that is never pruned.
 - `termstash pin <id>` / `termstash unpin <id>` — pin means preserved: it creates, verifies or

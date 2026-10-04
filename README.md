@@ -234,6 +234,21 @@ Ids are short — six characters is usually enough, and an ambiguous one is refu
 than guessed. `--json` works on `list`, `search` and `doctor`. `termstash --help` has the
 rest: filters, `--cwd`, `--replace`, `--details` and `unpin`.
 
+## From inside Claude Code
+
+Claude can manage its own session. Claude Code puts the current session's id in the
+environment of every command it runs, as `CLAUDE_CODE_SESSION_ID` (verified on 2.1.289):
+
+```bash
+termstash pin "$CLAUDE_CODE_SESSION_ID"                       # keep this conversation
+termstash rename "$CLAUDE_CODE_SESSION_ID" "Payout reconciliation"
+termstash list --json                                         # everything, for a program
+```
+
+Exit codes can be relied on: 0 when a command did what it says, 1 when it refused or failed —
+and for `doctor`, 1 means a confirmed finding. No command ever stops to ask a question. `resume` is the one exception by nature: it hands a terminal to Claude, so run from
+inside an agent it refuses and prints the command for a person to run instead.
+
 ## Where TermStash keeps its own state
 
 ```
