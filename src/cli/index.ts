@@ -2,6 +2,7 @@ import { parseArgs } from "./args.js";
 import { describeError } from "../core/text/safe.js";
 import type { ParsedArgs } from "./args.js";
 import { listCommand } from "./list.js";
+import { lastCommand } from "./last.js";
 import { resumeCommand } from "./resume.js";
 import { archiveCommand } from "./archive.js";
 import { doctorCommand } from "./doctor.js";
@@ -33,6 +34,7 @@ export async function run(argv: readonly string[]): Promise<number> {
   }
 
   if (args.command === "list") return listCommand(args);
+  if (args.command === "last") return lastCommand(args);
   if (args.command === "resume") return resumeCommand(args);
   if (args.command === "search") return searchCommand(args);
   if (args.command === "archive") return archiveCommand(args);

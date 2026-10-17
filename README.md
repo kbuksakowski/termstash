@@ -219,6 +219,7 @@ It exits non-zero only on a confirmed finding.
 ```bash
 termstash list                      # every session on the machine, newest first
 termstash list --at-risk            # only sessions approaching the retention cutoff
+termstash last                      # the sessions you were last in that are no longer open
 termstash search stripe             # titles, projects, prompts and replies
 termstash resume 7f31a2             # resume by short id, in the right project
 termstash pin 7f31a2                # mark important + keep a verified archive
@@ -240,6 +241,7 @@ Claude can manage its own session. Claude Code puts the current session's id in 
 environment of every command it runs, as `CLAUDE_CODE_SESSION_ID` (verified on 2.1.289):
 
 ```bash
+termstash last --json                                         # "I lost a session" — newest closed first
 termstash pin "$CLAUDE_CODE_SESSION_ID"                       # keep this conversation
 termstash rename "$CLAUDE_CODE_SESSION_ID" "Payout reconciliation"
 termstash list --json                                         # everything, for a program
