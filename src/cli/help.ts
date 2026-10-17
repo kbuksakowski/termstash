@@ -14,6 +14,7 @@ Usage
 
 Commands
   list                 List Claude Code sessions, newest first
+  last                 The sessions you were last in that are no longer open
   search <query>       Search titles, projects and conversation text
   resume <id>          Resume a session in its original project directory
   rename <id> <title>  Give a session a title of your own
@@ -32,6 +33,10 @@ Options for list
   --pinned             Only pinned sessions
   --limit <n>          Show at most n sessions
   --json               Emit sessions as JSON, with what could not be read
+
+Options for last
+  --limit <n>          Show n sessions (default 5)
+  --json               Emit them as JSON, each with the command to resume it
 
 Options for resume
   --cwd <dir>          Working directory, required when the original is gone
