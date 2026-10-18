@@ -95,12 +95,13 @@ describe("termstash last", () => {
 
     await lastCommand(parseArgs(["last", "--json"]), { now: NOW });
     const payload = JSON.parse(output()) as {
-      sessions: Array<{ id: string; shortId: string; title: string; resume: string }>;
+      sessions: Array<{ id: string; shortId: string; title: string; lastActive: string; resume: string }>;
       searched: { scanPartial: boolean };
     };
     expect(payload.sessions[0]).toMatchObject({
       id: ids.newest,
       shortId: "aaaaaa",
+      lastActive: "2m ago",
       resume: "termstash resume aaaaaa",
     });
     expect(payload.searched.scanPartial).toBe(false);

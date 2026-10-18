@@ -59,6 +59,10 @@ export async function lastCommand(args: ParsedArgs, deps: LastDeps = {}): Promis
         projectPath: s.projectPath,
         title: overlay.titles.get(s.id) ?? s.title,
         updatedAt: s.updatedAt,
+        // Said relative to now, because the reader of this is usually Claude,
+        // and `updatedAt` is UTC: it printed "11:14 UTC" to someone in Poland,
+        // or ran `date` first to work out what "a moment ago" meant.
+        lastActive: relativeTime(s.updatedAt, now),
         resume: `termstash resume ${label(s.id)}`,
       })),
       // The same envelope `list --json` carries: an agent reads stdout, and
