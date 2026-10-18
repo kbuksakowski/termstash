@@ -5,6 +5,21 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+
+- `doctor` reports a Claude Code newer than the last one recorded as a test fixture as
+  information, not as a potential problem. Claude ships nearly daily, so every new user's first
+  `doctor` carried that warning. A format change is still a potential finding, as an
+  unrecognised record type — the actual sign of one.
+
+### Fixed
+
+- The record types Claude Code writes from 2.1.300 — `api-request`, `api-request-blob`,
+  `api-request-shape`, `isolation-latch` — are known, so `doctor` no longer reports them as
+  unrecognised. None of them carries what titles, prompts or search read.
+
 ## [0.3.1] — 2026-10-18
 
 ### Fixed

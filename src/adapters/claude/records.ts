@@ -25,14 +25,22 @@ export type TranscriptRecord = {
  * Record types observed on Claude Code 2.1.263 during the technical spike and on
  * 2.1.269 and 2.1.289, plus the legacy `summary` older versions wrote.
  *
+ * The `api-request` three appeared in 2.1.300 and `isolation-latch` by 2.1.302,
+ * found on 2026-10-18 by `doctor` on a real machine across 2.1.290-2.1.302:
+ * request bookkeeping and a flag, written beside the conversation. None of
+ * them is `user` or `assistant`, which is all that titles, prompts and search
+ * read, and archive and restore copy the file whole.
+ *
  * Nothing branches on this list. It exists so `doctor` can notice the format
  * drifting - Claude's docs state the transcript format is internal and can
  * change on any release, which is the highest risk this project carries.
  */
 export const KNOWN_RECORD_TYPES: ReadonlySet<string> = new Set([
-  "agent-name", "ai-title", "artifact-autoreact-ledger", "artifact-comment-monitor",
+  "agent-name", "ai-title", "api-request", "api-request-blob", "api-request-shape",
+  "artifact-autoreact-ledger", "artifact-comment-monitor",
   "assistant", "atis-latch", "attachment", "bridge-session", "cost-state", "custom-title",
   "file-history-delta", "file-history-snapshot", "frame-link", "history-suppression",
+  "isolation-latch",
   "last-prompt", "mode", "permission-mode", "pr-link", "queue-operation", "summary",
   "system", "user",
 ]);

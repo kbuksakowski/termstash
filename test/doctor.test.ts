@@ -167,7 +167,19 @@ describe("doctor: potential findings", () => {
     expect(codes(await report())).not.toContain("unknown-record-types");
   });
 
-  it("flags a Claude newer than the verified build once, not per session", async () => {
+  it("knows the request records Claude Code writes from 2.1.300", async () => {
+    const records = conversation({ id: A, cwd: CWD, prompt: "hello", version: "2.1.302" });
+    for (const type of ["api-request", "api-request-blob", "api-request-shape", "isolation-latch"]) {
+      records.push({ type, sessionId: A });
+    }
+    await writeTranscript({ id: A, cwd: CWD, records });
+
+    const r = await report();
+    expect(codes(r)).not.toContain("unknown-record-types");
+    expect(r.findings.filter((f) => f.class === "potential")).toEqual([]);
+  });
+
+  it("reports a Claude newer than the verified build once, as a fact rather than a problem", async () => {
     for (const id of [A, B]) {
       await writeTranscript({
         id,
@@ -177,7 +189,7 @@ describe("doctor: potential findings", () => {
     }
     const r = await report();
     const finding = find(r, "newer-claude-version");
-    expect(finding?.class).toBe("potential");
+    expect(finding?.class).toBe("informational");
     expect(finding?.details).toEqual(["2.1.999"]);
   });
 });
