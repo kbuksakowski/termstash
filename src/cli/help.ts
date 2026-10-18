@@ -7,7 +7,7 @@ import { VERSION } from "./version.js";
  * contradict, and nothing could check it.
  */
 export const HELP = `termstash ${VERSION}
-Your Claude Code sessions expire. Keep the important ones.
+Lost a Claude Code session? Get back into it.
 
 Usage
   termstash <command> [options]
