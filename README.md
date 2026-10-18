@@ -28,11 +28,10 @@ Recently active sessions that are no longer open
   3e8fee  billing-service  4d ago       Invoice rounding
 
 Resume the most recent:
-  termstash resume 91bc22
+  npx termstash resume 91bc22
 ```
 
 `resume` opens Claude in that session's own project directory, wherever you run it from.
-Without installing, resume with `npx termstash resume 91bc22`.
 
 Both need Node 20.11+ on macOS or Linux. To keep the CLI installed: `npm install -g termstash`.
 Local-first, open source, no account.
