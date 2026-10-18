@@ -4,14 +4,14 @@ description: Find and resume a Claude Code session the user lost track of — th
 allowed-tools:
   - Bash(termstash last *)
   - Bash(termstash search *)
-  - Bash(npx termstash@latest last *)
-  - Bash(npx termstash@latest search *)
+  - Bash(npx termstash@0.3.2 last *)
+  - Bash(npx termstash@0.3.2 search *)
 ---
 
 # Find a lost Claude Code session
 
 1. Run `termstash last --json`. Only if that fails with "command not found", run
-   `npx termstash@latest last --json` instead. Do not check where it is installed first.
+   `npx termstash@0.3.2 last --json` instead. Do not check where it is installed first.
    It returns the sessions the user was most recently in that are no longer open, across every
    project, newest first. The session you are in now is live, so it is never in the list.
 
