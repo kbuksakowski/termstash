@@ -5,6 +5,13 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Plugin 0.3.3 — 2026-10-18
+
+The plugin alone; the CLI stays at 0.3.2.
+
+- The skill's `npx` fallback is pinned to `termstash@0.3.2` instead of `@latest`.
+- `plugin/README.md` says what the plugin runs: two read-only commands, nothing sent anywhere.
+
 ## [0.3.2] — 2026-10-18
 
 ### Changed
