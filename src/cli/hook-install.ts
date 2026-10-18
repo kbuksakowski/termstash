@@ -2,11 +2,11 @@ import { randomBytes } from "node:crypto";
 import { describeError } from "../core/text/safe.js";
 import { chmod, lstat, mkdir, readFile, realpath, rename, rm, stat, writeFile } from "node:fs/promises";
 import { join } from "node:path";
-import { execFileSync } from "node:child_process";
 import { claudeRoot } from "../adapters/claude/paths.js";
 import { openUserFile } from "../core/fs/user-file.js";
 import type { ParsedArgs } from "./args.js";
 import { flagBool } from "./args.js";
+import { invocation } from "./invocation.js";
 import { err, out, safe } from "./format.js";
 
 /**
@@ -27,6 +27,14 @@ const MARKER = "termstash-hook";
  * final turn of a clean exit.
  */
 const EVENTS = ["Stop", "SessionEnd"] as const;
+
+/** The shell command for one hook event: `termstash` from PATH, else this install's own path. */
+export function hookCommandLine(event: "stop" | "session-end", node: string, cli: string): string {
+  return (
+    `command -v termstash >/dev/null 2>&1 && exec termstash hook ${event}; ` +
+    `exec ${shellQuote(node)} ${shellQuote(cli)} hook ${event} # ${MARKER}`
+  );
+}
 
 /** POSIX single-quoting: nothing inside survives as anything but literal text. */
 export function shellQuote(value: string): string {
@@ -68,6 +76,16 @@ export async function hookInstallCommand(args: ParsedArgs): Promise<number> {
   const remove = flagBool(args, "uninstall");
   const path = join(claudeRoot(), "settings.json");
 
+  // A hook pointing into npx's cache runs until npx cleans it, then fails
+  // after every turn. The hook needs an install that stays where it is.
+  if (!remove && invocation() !== "termstash") {
+    return fail(
+      "The hook needs TermStash installed, not run through npx:\n" +
+        "  npm install -g termstash\n" +
+        "  termstash hook install",
+    );
+  }
+
   for (let attempt = 1; attempt <= WRITE_ATTEMPTS; attempt += 1) {
     const result = await attemptEdit(path, remove);
     if (result.kind === "refused") return fail(result.message);
@@ -104,6 +122,37 @@ export async function hookInstallCommand(args: ParsedArgs): Promise<number> {
     safe`${path} is being written by something else; TermStash's change did not survive ${WRITE_ATTEMPTS} attempts.\n` +
       "Close whatever is editing it and run this again. Nothing of yours was lost.",
   );
+}
+
+/** The TermStash hook commands Claude's settings hold now, for doctor. */
+export async function installedHookCommands(path: string): Promise<string[]> {
+  const handle = await openUserFile(path).catch(() => undefined);
+  if (handle === undefined) return [];
+  let raw: string;
+  try {
+    raw = await handle.readFile("utf8");
+  } finally {
+    await handle.close();
+  }
+  let parsed: unknown;
+  try {
+    parsed = JSON.parse(raw);
+  } catch {
+    return [];
+  }
+  const hooks = asRecord((parsed as Record<string, unknown>)["hooks"]);
+  const commands: string[] = [];
+  for (const event of EVENTS) {
+    const entries = hooks[event];
+    if (!Array.isArray(entries)) continue;
+    for (const entry of entries) {
+      if (!isPlainObject(entry) || !Array.isArray(entry["hooks"])) continue;
+      for (const hook of entry["hooks"] as unknown[]) {
+        if (isOurCommand(hook, event)) commands.push((hook as Record<string, unknown>)["command"] as string);
+      }
+    }
+  }
+  return commands;
 }
 
 /** True when the file on disk now says what this command set out to make it say. */
@@ -187,16 +236,19 @@ async function attemptEdit(path: string, remove: boolean): Promise<Attempt> {
     }
   }
 
-  // Prefer the bare command when the binary is on PATH: it survives a version
-  // upgrade that moves the install directory. Fall back to an absolute path.
+  // The command Claude runs after every turn, through `/bin/sh -c` and with
+  // Claude's own PATH - measured on 2.1.302, no login shell. A bare
+  // `termstash` was `command not found` whenever that PATH lacked it: Claude
+  // started from outside a terminal, or nvm's default moved to a Node version
+  // TermStash is not installed under. So the bare command is tried first,
+  // which survives an upgrade that moves the install, and this install's own
+  // absolute path is the fallback. `doctor` reports it when both fail.
   //
-  // Whatever goes in here is a shell command Claude runs after every turn, so
-  // the paths are single-quoted rather than JSON-quoted. Double quotes still
+  // The paths are single-quoted rather than JSON-quoted. Double quotes still
   // expand `$(...)`, backticks and `\`, and an install path is not something
   // this tool gets to assume is well behaved.
-  const base = onPath()
-    ? "termstash"
-    : `${shellQuote(process.execPath)} ${shellQuote(process.argv[1] ?? "")}`;
+  const commandFor = (event: (typeof EVENTS)[number]) =>
+    hookCommandLine(event === "Stop" ? "stop" : "session-end", process.execPath, process.argv[1] ?? "");
 
   // "Additive" has to mean it. A hooks field of an unexpected shape is someone
   // else's configuration, and quietly dropping it is the one thing this edit
@@ -235,13 +287,23 @@ async function attemptEdit(path: string, remove: boolean): Promise<Attempt> {
       continue;
     }
 
-    if (mine !== -1) continue;
+    if (mine !== -1) {
+      // Rewrite an older command in place - a bare `termstash` from before,
+      // or a path to a Node version that has since gone. Running install
+      // again is the fix doctor suggests, so it has to change something.
+      const rewritten = entries.map((entry) => withOurCommand(entry, event, commandFor(event)));
+      if (JSON.stringify(rewritten) !== JSON.stringify(entries)) {
+        hooks[event] = rewritten;
+        changed = true;
+      }
+      continue;
+    }
     entries.push({
       matcher: "*",
       hooks: [
         {
           type: "command",
-          command: `${base} hook ${event === "Stop" ? "stop" : "session-end"} # termstash-hook`,
+          command: commandFor(event),
           timeout: 60,
         },
       ],
@@ -344,6 +406,16 @@ function isOurCommand(hook: unknown, event: (typeof EVENTS)[number]): boolean {
   );
 }
 
+/** An entry with our hook's command replaced, everything else untouched. */
+function withOurCommand(entry: unknown, event: (typeof EVENTS)[number], command: string): unknown {
+  if (!isOurs(entry, event)) return entry;
+  const record = entry as Record<string, unknown>;
+  const inner = (record["hooks"] as unknown[]).map((h) =>
+    isOurCommand(h, event) ? { ...(h as Record<string, unknown>), command } : h,
+  );
+  return { ...record, hooks: inner };
+}
+
 /**
  * An entry with our hook taken out of it, or nothing if that empties it.
  *
@@ -368,15 +440,4 @@ function withoutOurs(entry: unknown, event: (typeof EVENTS)[number]): unknown {
 function fail(message: string): number {
   err(`${message}\n`);
   return 1;
-}
-
-function onPath(): boolean {
-  try {
-    execFileSync(process.platform === "win32" ? "where" : "which", ["termstash"], {
-      stdio: "ignore",
-    });
-    return true;
-  } catch {
-    return false;
-  }
 }

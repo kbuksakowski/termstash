@@ -34,6 +34,8 @@ export type DoctorInput = {
   claudeProjects?: string;
   /** Whether the Stop hook is actually present in Claude's settings. */
   hookInstalled?: boolean;
+  /** The TermStash hook commands in Claude's settings now. */
+  hookCommands?: readonly string[];
   history?: HistoryInput;
 };
 
@@ -349,6 +351,23 @@ export async function runDoctor(input: DoctorInput): Promise<DoctorReport> {
     push(findings, "Protection", "informational", "hook-not-installed",
       `${pinnedIds.size} pinned session(s), and the Stop hook is not in Claude's settings — their archives are refreshed only when you run 'termstash pin' or 'termstash archive' yourself`,
       ["termstash hook install"]);
+  }
+
+  // A hook that is installed and failing was as invisible as one that is not:
+  // exit 127 from a PATH without the CLI on it, nothing on screen, and only a
+  // hollow star much later. Claude records the failure in the transcript.
+  // Only failures of the command installed now: one rewritten by a later
+  // `hook install` is fixed, and a session nobody returns to would otherwise
+  // carry its old failure until Claude sweeps it.
+  const current = new Set((input.hookCommands ?? []).map((c) => c.trim()));
+  const hookFailing = sessions.filter(
+    (s) => s.hookFailure !== undefined && current.has(s.hookFailure.command.trim()),
+  );
+  if (hookFailing.length > 0) {
+    const errors = [...new Set(hookFailing.map((s) => s.hookFailure?.error ?? ""))];
+    push(findings, "Protection", "confirmed", "hook-failing",
+      `the TermStash hook failed the last time it ran in ${hookFailing.length} session(s), so pinned sessions are not being refreshed. Run 'termstash hook install' again to rewrite it with this install's path`,
+      errors);
   }
 
   const archivesById = new Map(archives.map((a) => [a.sessionId, a]));

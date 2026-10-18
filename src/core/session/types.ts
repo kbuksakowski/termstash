@@ -56,6 +56,8 @@ export type Session = {
   parseWarnings: string[];
   /** Record types this build has never seen. Fuel for doctor, not for logic. */
   unknownRecordTypes?: string[];
+  /** The TermStash hook's command and error, when it failed the last time it ran in this session. */
+  hookFailure?: { command: string; error: string };
 };
 
 /**

@@ -76,6 +76,7 @@ export async function discoverSessions(options: DiscoverOptions = {}): Promise<D
       ...(parsed.unknownRecordTypes.length > 0
         ? { unknownRecordTypes: parsed.unknownRecordTypes }
         : {}),
+      ...(parsed.hookFailure !== undefined ? { hookFailure: parsed.hookFailure } : {}),
       parseWarnings: warnings,
     };
 

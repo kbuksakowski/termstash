@@ -1,6 +1,6 @@
 {
   "name": "termstash",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Lost a Claude Code session? Get back into it. Find, resume and keep your Claude Code sessions.",
   "license": "MIT",
   "type": "module",
