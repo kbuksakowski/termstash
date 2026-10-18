@@ -43,10 +43,10 @@ cat <<'BANNER'
 
   Full loop (the strongest one):
 
-    termstash pin d5e5f2
-    rm /tmp/termstash-demo/claude/projects/-Users-you-work-billing-service/d5e5f2*.jsonl
+    termstash pin 5b0e7c
+    rm /tmp/termstash-demo/claude/projects/-Users-you-work-billing-service/5b0e7c*.jsonl
     termstash list                  # gone
-    termstash restore d5e5f2
+    termstash restore 5b0e7c
     termstash list                  # back
 
   Type `exit` to leave.
