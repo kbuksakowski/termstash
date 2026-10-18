@@ -157,15 +157,18 @@ export async function runDoctor(input: DoctorInput): Promise<DoctorReport> {
     .filter((v) => compareVersions(v, VERIFIED_CLAUDE_VERSION) > 0)
     .sort(compareVersions);
   if (newerVersions.length > 0) {
-    // Claude auto-updates, so this is expected rather than alarming. It is
-    // reported once, about the versions, not once per session: the useful fact
-    // is that parsing is untested against them, not how many files exist.
+    // A fact, not a warning. Claude ships nearly daily, so this was a
+    // "potential" problem on every new user's first doctor within a day of
+    // any bump: 127,188 records across 33 versions had produced no unknown
+    // once, and the version number was standing in for the real question.
+    // That question is asked above - an unrecognised record type is what a
+    // format change looks like - and it stays a potential finding.
     const range =
       newerVersions.length === 1
         ? newerVersions[0]
         : `${newerVersions[0]}–${newerVersions[newerVersions.length - 1]}`;
-    push(findings, "Sessions", "potential", "newer-claude-version",
-      `transcripts written by Claude Code ${range}, newer than the verified ${VERIFIED_CLAUDE_VERSION} — parsing is untested against ${newerVersions.length === 1 ? "it" : "these"}`,
+    push(findings, "Sessions", "informational", "newer-claude-version",
+      `transcripts written by Claude Code ${range}, newer than ${VERIFIED_CLAUDE_VERSION}, the newest recorded as a test fixture`,
       newerVersions);
   }
 
