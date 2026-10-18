@@ -107,6 +107,19 @@ describe("termstash last", () => {
     expect(payload.searched.scanPartial).toBe(false);
   });
 
+  it("gives back an npx line to whoever ran it through npx, who has no termstash to type", async () => {
+    await session(ids.newest, 2);
+    let output = capture();
+    await lastCommand(parseArgs(["last"]), { now: NOW, invocation: "npx termstash" });
+    expect(output()).toContain("npx termstash resume aaaaaa");
+    vi.restoreAllMocks();
+
+    output = capture();
+    await lastCommand(parseArgs(["last", "--json"]), { now: NOW, invocation: "npx termstash" });
+    const payload = JSON.parse(output()) as { sessions: Array<{ resume: string }> };
+    expect(payload.sessions[0]?.resume).toBe("npx termstash resume aaaaaa");
+  });
+
   it("says so when every session is still open", async () => {
     await session(ids.live, 0);
     await writeLiveSession(process.pid, ids.live);

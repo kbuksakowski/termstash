@@ -6,6 +6,7 @@ import { allSessions } from "./sessions.js";
 import { readOverlay } from "./list.js";
 import type { ParsedArgs } from "./args.js";
 import { flagBool, flagNumber } from "./args.js";
+import { invocation } from "./invocation.js";
 import { err, jsonOut, out, relativeTime, renderTable, safe, safeText, terminalWidth } from "./format.js";
 
 const DEFAULT_COUNT = 5;
@@ -13,6 +14,8 @@ const DEFAULT_COUNT = 5;
 export type LastDeps = {
   discover?: () => Promise<Discovery>;
   now?: Date;
+  /** What the person typed to run TermStash: `termstash` or `npx termstash`. */
+  invocation?: string;
 };
 
 /**
@@ -38,6 +41,7 @@ export async function lastCommand(args: ParsedArgs, deps: LastDeps = {}): Promis
   const now = deps.now ?? new Date();
   const count = flagNumber(args, "limit") ?? DEFAULT_COUNT;
   const discover = deps.discover ?? (() => discoverSessions({ now }));
+  const self = deps.invocation ?? invocation();
 
   const { sessions, unreadable } = await allSessions({ root: termstashRoot(), discover });
   const overlay = await readOverlay(sessions);
@@ -63,7 +67,7 @@ export async function lastCommand(args: ParsedArgs, deps: LastDeps = {}): Promis
         // and `updatedAt` is UTC: it printed "11:14 UTC" to someone in Poland,
         // or ran `date` first to work out what "a moment ago" meant.
         lastActive: relativeTime(s.updatedAt, now),
-        resume: `termstash resume ${label(s.id)}`,
+        resume: `${self} resume ${label(s.id)}`,
       })),
       // The same envelope `list --json` carries: an agent reads stdout, and
       // "no recent sessions" and "could not look" must not read the same.
@@ -103,7 +107,7 @@ export async function lastCommand(args: ParsedArgs, deps: LastDeps = {}): Promis
   for (const line of lines) out(safe`  ${line}\n`);
   const first = closed[0];
   if (first !== undefined) {
-    out(safe`\nResume the most recent:\n  termstash resume ${safeText(label(first.id))}\n`);
+    out(safe`\nResume the most recent:\n  ${self} resume ${safeText(label(first.id))}\n`);
   }
   return 0;
 }
