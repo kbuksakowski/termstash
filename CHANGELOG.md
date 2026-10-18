@@ -5,7 +5,16 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [0.1.0] — unreleased
+## [0.2.0] — 2026-10-17
+
+### Added
+
+- `termstash last` — the sessions you were most recently in that are no longer open, across
+  every project, newest first, with the command to resume the first. For when the laptop lid
+  closed and the terminal came back without the session. `--json` gives each one with its
+  `resume` command, for Claude to hand back.
+
+## [0.1.0] — 2026-10-04
 
 First working release. Verified against Claude Code 2.1.269 and 2.1.289 on macOS and Linux.
 
@@ -14,10 +23,6 @@ First working release. Verified against Claude Code 2.1.269 and 2.1.289 on macOS
 - `termstash list` — every session on the machine, newest first, including ones Claude's own
   picker hides (`-p`/SDK sessions, background sessions, sessions outside the current worktree).
   Markers for protection, live, retention risk and unknown retention.
-- `termstash last` — the sessions you were most recently in that are no longer open, across
-  every project, newest first, with the command to resume the first. For when the laptop lid
-  closed and the terminal came back without the session. `--json` gives each one with its
-  `resume` command, for Claude to hand back.
 - `termstash search <query>` — streaming full-text across titles, projects, cleaned human
   prompts and transcripts, plus Claude's prompt history, so a query can find work whose
   transcript Claude has already deleted. No index, no external binary.
