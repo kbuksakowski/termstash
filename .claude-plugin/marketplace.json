@@ -1,0 +1,15 @@
+{
+  "name": "termstash",
+  "owner": {
+    "name": "Kamil Buksakowski",
+    "email": "oss@kamilbuksakowski.dev"
+  },
+  "description": "TermStash: find and resume the Claude Code sessions you closed.",
+  "plugins": [
+    {
+      "name": "termstash",
+      "source": "./plugin",
+      "description": "Lost a Claude Code session? Ask Claude. It finds the sessions you closed and gives you the command to get back in."
+    }
+  ]
+}

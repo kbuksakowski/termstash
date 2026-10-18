@@ -9,3 +9,4 @@ coverage/
 # committed them in round four. Synthetic, but nothing about their shape says
 # so, and in a public repository a file named like a session reads as one.
 /[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]-*
+plugin/evals/results/

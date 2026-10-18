@@ -237,7 +237,17 @@ rest: filters, `--cwd`, `--replace`, `--details` and `unpin`.
 
 ## From inside Claude Code
 
-Claude can manage its own session. Claude Code puts the current session's id in the
+Install the plugin and you can just tell Claude you lost a session:
+
+```
+/plugin install termstash --marketplace kbuksakowski/termstash
+```
+
+It adds one skill, `termstash:find-session`. Claude lists the sessions you most recently
+closed, picks the one you describe, and gives you the `termstash resume` line to type. It runs
+the CLI through `npx` when TermStash is not installed. Needs Claude Code 2.1.275 or later.
+
+Claude can also manage its own session. Claude Code puts the current session's id in the
 environment of every command it runs, as `CLAUDE_CODE_SESSION_ID` (verified on 2.1.289):
 
 ```bash
