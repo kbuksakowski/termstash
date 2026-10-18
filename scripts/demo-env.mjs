@@ -70,7 +70,7 @@ const SESSIONS = [
   { id: "c4d19a70-0000-4000-8000-000000000005", project: "platform-infra",
     title: "Terraform state lock", prompt: "terraform state keeps locking in CI",
     ageDays: 24 },
-  { id: "d5e5f2a6-0000-4000-8000-000000000006", project: "billing-service",
+  { id: "5b0e7c19-0000-4000-8000-000000000006", project: "billing-service",
     title: "Stripe payout reconciliation", prompt: "reconcile stripe payouts against our ledger",
     ageDays: 26 },
 ];
