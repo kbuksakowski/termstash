@@ -28,6 +28,8 @@ export type ParsedTranscript = {
   internalSessionIds: string[];
   /** Record types we have never seen. An early signal that Claude's format moved. */
   unknownRecordTypes: string[];
+  /** The TermStash hook's command and error, when the last time it ran in this session it failed. */
+  hookFailure?: HookFailure;
   warnings: string[];
 };
 
@@ -221,6 +223,8 @@ function assemble(head: HeadChunk, tail: Chunk, sizeBytes: number): ParsedTransc
     warnings.push(`transcript mixes ${internalSessionIds.length} session ids`);
   }
 
+  const hookFailure = lastHookFailure(tail.records.length > 0 ? tail.records : head.records);
+
   return {
     ...(cwd !== undefined ? { cwd } : {}),
     cwdHistory,
@@ -233,8 +237,55 @@ function assemble(head: HeadChunk, tail: Chunk, sizeBytes: number): ParsedTransc
     ...(titleSource !== undefined ? { titleSource } : {}),
     internalSessionIds,
     unknownRecordTypes,
+    ...(hookFailure !== undefined ? { hookFailure } : {}),
     warnings,
   };
+}
+
+export type HookFailure = { command: string; error: string };
+
+/** The tail every command `hook install` writes ends with. */
+const HOOK_MARKER = "# termstash-hook";
+
+/**
+ * Whether the TermStash hook failed the last time it ran here, and how.
+ *
+ * Claude Code runs a hook through `/bin/sh -c` with its own PATH, so a CLI
+ * installed under one nvm version, or a Claude started from somewhere that
+ * never read the shell profile, gets `command not found` - exit 127, nothing
+ * on screen, and a pinned session that quietly stops being archived. Claude
+ * records it: a `hook_non_blocking_error` attachment carrying the command and
+ * stderr, then a `stop_hook_summary` listing what ran. Measured on 2.1.302.
+ *
+ * Read in order, so a later turn where the hook ran cleanly clears an earlier
+ * failure: the question is whether it is failing now.
+ */
+function lastHookFailure(records: readonly TranscriptRecord[]): HookFailure | undefined {
+  let failure: HookFailure | undefined;
+  let failedThisTurn = false;
+  for (const record of records) {
+    if (record.type === "attachment") {
+      const attachment = record.attachment;
+      if (typeof attachment !== "object" || attachment === null) continue;
+      const a = attachment as Record<string, unknown>;
+      if (a["type"] !== "hook_non_blocking_error") continue;
+      const command = str(a["command"]);
+      if (command === undefined || !command.trimEnd().endsWith(HOOK_MARKER)) continue;
+      failure = { command, error: str(a["stderr"]) ?? `exit code ${String(a["exitCode"] ?? "unknown")}` };
+      failedThisTurn = true;
+    } else if (record.type === "system" && record.subtype === "stop_hook_summary") {
+      const infos = record.hookInfos;
+      const ran =
+        Array.isArray(infos) &&
+        infos.some((info) => {
+          const command = typeof info === "object" && info !== null ? str((info as Record<string, unknown>)["command"]) : undefined;
+          return command !== undefined && command.trimEnd().endsWith(HOOK_MARKER);
+        });
+      if (ran && !failedThisTurn) failure = undefined;
+      failedThisTurn = false;
+    }
+  }
+  return failure;
 }
 
 function promptText(record: TranscriptRecord): string | undefined {

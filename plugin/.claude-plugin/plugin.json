@@ -1,6 +1,6 @@
 {
   "name": "termstash",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "description": "Lost a Claude Code session? Ask Claude. It finds the sessions you closed and gives you the command to get back in.",
   "author": {
     "name": "Kamil Buksakowski",

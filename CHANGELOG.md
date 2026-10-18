@@ -5,7 +5,7 @@ All notable changes to this project are documented here.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [0.3.2] — 2026-10-18
 
 ### Changed
 
@@ -16,6 +16,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- The hook no longer depends on Claude's PATH. Claude Code runs hooks through `/bin/sh -c` with
+  its own environment, so a bare `termstash` was `command not found` after every turn whenever
+  that PATH lacked it — Claude started outside a terminal, or nvm's default moved to a Node
+  version TermStash is not installed under — and pinned sessions silently stopped being
+  archived. `hook install` now writes `termstash` from PATH with this install's absolute path as
+  the fallback, and rewrites an older entry when run again. It refuses to install from `npx`.
+- `doctor` reports the hook failing, as a confirmed finding, from what Claude records after each
+  turn — only for the command installed now, so running `hook install` again clears it.
 - The record types Claude Code writes from 2.1.300 — `api-request`, `api-request-blob`,
   `api-request-shape`, `isolation-latch` — are known, so `doctor` no longer reports them as
   unrecognised. None of them carries what titles, prompts or search read.

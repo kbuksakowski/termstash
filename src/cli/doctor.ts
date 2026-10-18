@@ -4,7 +4,7 @@ import { readHistory } from "../adapters/claude/history.js";
 import { findOrphans } from "../adapters/claude/orphans.js";
 import { join } from "node:path";
 import { claudeRoot, projectsDir } from "../adapters/claude/paths.js";
-import { isAsIntended } from "./hook-install.js";
+import { isAsIntended, installedHookCommands } from "./hook-install.js";
 import { listArchives } from "../core/archive/store.js";
 import { runDoctor } from "../core/doctor/run.js";
 import { toLostSessions } from "../core/session/lost.js";
@@ -52,6 +52,7 @@ export async function doctorCommand(args: ParsedArgs, deps: DoctorDeps = {}): Pr
     termstashRoot: root,
     claudeProjects: projectsDir(claude),
     hookInstalled: await isAsIntended(join(claude, "settings.json"), false),
+    hookCommands: await installedHookCommands(join(claude, "settings.json")),
     history: { lost, unattributed: history.unattributed },
   });
 

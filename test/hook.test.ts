@@ -10,7 +10,9 @@ import { hookInstallCommand } from "../src/cli/hook-install.js";
 import { hookCommand } from "../src/cli/hook.js";
 import { conversation, writeTranscript } from "./helpers/sandbox.js";
 import { execFileSync } from "node:child_process";
-import { shellQuote } from "../src/cli/hook-install.js";
+import { hookCommandLine, installedHookCommands, shellQuote } from "../src/cli/hook-install.js";
+import { mkdtemp, chmod } from "node:fs/promises";
+import { tmpdir } from "node:os";
 
 const ID = "aaaaaaaa-0000-4000-8000-000000000001";
 const CWD = "/tmp/backend_api";
@@ -185,6 +187,35 @@ describe("hook install", () => {
     expect(JSON.stringify(after.hooks.SessionEnd)).toContain("someone-elses-tool");
   });
 
+  it("rewrites an older command in place, so running install again is the fix", async () => {
+    // What 0.3.1 and earlier wrote when termstash was on PATH: the command
+    // that came back `command not found` from a Claude without it.
+    const old = (sub: string) => [{ matcher: "*", hooks: [{ type: "command", command: `termstash hook ${sub} # termstash-hook`, timeout: 60 }] }];
+    await writeFile(settingsPath(), JSON.stringify({ hooks: { Stop: old("stop"), SessionEnd: old("session-end") } }));
+    capture();
+
+    expect(await hookInstallCommand(parseArgs(["hook", "install"]))).toBe(0);
+    const settings = JSON.parse(await readFile(settingsPath(), "utf8"));
+    expect(settings.hooks.Stop).toHaveLength(1);
+    expect(settings.hooks.Stop[0].hooks[0].command).toBe(hookCommandLine("stop", process.execPath, process.argv[1] ?? ""));
+    expect(settings.hooks.Stop[0].hooks[0].timeout).toBe(60);
+    expect(out.join("")).not.toMatch(/already installed/);
+  });
+
+  it("will not point the hook into npx's cache", async () => {
+    const real = process.argv[1];
+    process.argv[1] = "/Users/you/.npm/_npx/0123456789abcdef/node_modules/.bin/termstash";
+    const errors: string[] = [];
+    vi.spyOn(process.stderr, "write").mockImplementation((c) => (errors.push(String(c)), true));
+    try {
+      expect(await hookInstallCommand(parseArgs(["hook", "install"]))).toBe(1);
+    } finally {
+      process.argv[1] = real ?? "";
+    }
+    expect(errors.join("")).toMatch(/npm install -g termstash/);
+    await expect(stat(settingsPath())).rejects.toThrow();
+  });
+
   it("refuses to rewrite a settings file it cannot parse", async () => {
     await writeFile(settingsPath(), "{ broken json");
     const errors: string[] = [];
@@ -214,6 +245,19 @@ describe("the installed hook command is a shell command", () => {
     expect(shellQuote(input)).toBe(expected);
   });
 
+  it("runs termstash from PATH when it is there, and its own path when it is not", async () => {
+    // Claude runs hooks through /bin/sh -c with its own PATH. Without the CLI
+    // on it, the bare command was exit 127 after every turn.
+    const line = hookCommandLine("stop", "/bin/echo", "fallback");
+    const run = (path: string) => execFileSync("/bin/sh", ["-c", line], { encoding: "utf8", env: { PATH: path } });
+    expect(run("/usr/bin:/bin")).toBe("fallback hook stop\n");
+
+    const bin = await mkdtemp(join(tmpdir(), "termstash-path-"));
+    await writeFile(join(bin, "termstash"), "#!/bin/sh\necho from-path \"$@\"\n");
+    await chmod(join(bin, "termstash"), 0o755);
+    expect(run(`${bin}:/usr/bin:/bin`)).toBe("from-path hook stop\n");
+  });
+
   it("round-trips through a real shell unchanged", () => {
     for (const path of ["/home/a$(whoami)/x", "/we'ird/x", "/back`tick`/x", "/a b/x"]) {
       const out = execFileSync("/bin/sh", ["-c", `printf %s ${shellQuote(path)}`], {
@@ -221,5 +265,18 @@ describe("the installed hook command is a shell command", () => {
       });
       expect(out).toBe(path);
     }
+  });
+});
+
+describe("installed hook commands, for doctor", () => {
+  it("are the commands hook install wrote, and nothing else", async () => {
+    vi.spyOn(process.stdout, "write").mockImplementation(() => true);
+    const path = join(claudeRoot(), "settings.json");
+    await writeFile(path, JSON.stringify({ hooks: { Stop: [{ hooks: [{ type: "command", command: "someone-elses-tool" }] }] } }));
+    await hookInstallCommand(parseArgs(["hook", "install"]));
+
+    const commands = await installedHookCommands(path);
+    expect(commands).toHaveLength(2);
+    expect(commands.every((c) => c.endsWith("# termstash-hook"))).toBe(true);
   });
 });

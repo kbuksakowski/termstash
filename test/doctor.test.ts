@@ -21,7 +21,7 @@ function home(): string {
   return value;
 }
 
-async function report(): Promise<DoctorReport> {
+async function report(extra: { hookCommands?: string[] } = {}): Promise<DoctorReport> {
   const discovery = await discoverSessions({ root: root(), now: NOW });
   const orphans = await findOrphans(root(), new Set(discovery.sessions.map((s) => s.id)));
   return runDoctor({
@@ -30,6 +30,7 @@ async function report(): Promise<DoctorReport> {
     unreadable: discovery.unreadable,
     orphans,
     termstashRoot: home(),
+    ...extra,
   });
 }
 
@@ -165,6 +166,57 @@ describe("doctor: potential findings", () => {
     await writeTranscript({ id: A, cwd: CWD, records });
 
     expect(codes(await report())).not.toContain("unknown-record-types");
+  });
+
+  it("reports the hook failing, from what Claude recorded after the turn", async () => {
+    const records = conversation({ id: A, cwd: CWD, prompt: "hello" });
+    const command = "termstash hook stop # termstash-hook";
+    records.push(
+      { type: "attachment", sessionId: A, attachment: { type: "hook_non_blocking_error", hookEvent: "Stop", command, exitCode: 127,
+        stderr: "Failed with non-blocking status code: /bin/sh: termstash: command not found" } },
+      { type: "system", subtype: "stop_hook_summary", sessionId: A, hookInfos: [{ command }], hookErrors: ["…"] },
+    );
+    await writeTranscript({ id: A, cwd: CWD, records });
+
+    const finding = find(await report({ hookCommands: [command] }), "hook-failing");
+    expect(finding?.class).toBe("confirmed");
+    expect(finding?.details).toEqual(["Failed with non-blocking status code: /bin/sh: termstash: command not found"]);
+  });
+
+  it("does not report a hook failure a later turn ran cleanly after", async () => {
+    const records = conversation({ id: A, cwd: CWD, prompt: "hello" });
+    const command = "termstash hook stop # termstash-hook";
+    records.push(
+      { type: "attachment", sessionId: A, attachment: { type: "hook_non_blocking_error", command, exitCode: 127, stderr: "command not found" } },
+      { type: "system", subtype: "stop_hook_summary", sessionId: A, hookInfos: [{ command }] },
+      { type: "system", subtype: "stop_hook_summary", sessionId: A, hookInfos: [{ command }] },
+    );
+    await writeTranscript({ id: A, cwd: CWD, records });
+
+    expect(codes(await report({ hookCommands: [command] }))).not.toContain("hook-failing");
+  });
+
+  it("does not report a failure of a command that has since been reinstalled", async () => {
+    // The session where it failed may never get another turn; once
+    // `hook install` has written a new command, the old failure is history.
+    const records = conversation({ id: A, cwd: CWD, prompt: "hello" });
+    const old = "termstash hook stop # termstash-hook";
+    records.push(
+      { type: "attachment", sessionId: A, attachment: { type: "hook_non_blocking_error", command: old, exitCode: 127, stderr: "command not found" } },
+      { type: "system", subtype: "stop_hook_summary", sessionId: A, hookInfos: [{ command: old }] },
+    );
+    await writeTranscript({ id: A, cwd: CWD, records });
+
+    const now = "command -v termstash >/dev/null 2>&1 && exec termstash hook stop; exec '/n' '/c' hook stop # termstash-hook";
+    expect(codes(await report({ hookCommands: [now] }))).not.toContain("hook-failing");
+  });
+
+  it("ignores a failing hook that is not TermStash's", async () => {
+    const records = conversation({ id: A, cwd: CWD, prompt: "hello" });
+    records.push({ type: "attachment", sessionId: A, attachment: { type: "hook_non_blocking_error", command: "lint-on-stop", exitCode: 1, stderr: "lint failed" } });
+    await writeTranscript({ id: A, cwd: CWD, records });
+
+    expect(codes(await report({ hookCommands: ["lint-on-stop"] }))).not.toContain("hook-failing");
   });
 
   it("knows the request records Claude Code writes from 2.1.300", async () => {

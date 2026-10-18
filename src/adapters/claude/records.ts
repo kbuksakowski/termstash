@@ -19,6 +19,9 @@ export type TranscriptRecord = {
   message?: { role?: unknown; content?: unknown } | unknown;
   customTitle?: unknown;
   aiTitle?: unknown;
+  subtype?: unknown;
+  attachment?: unknown;
+  hookInfos?: unknown;
 };
 
 /**
