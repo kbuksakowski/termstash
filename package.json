@@ -1,6 +1,6 @@
 {
   "name": "termstash",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Your Claude Code sessions expire. Keep the important ones.",
   "license": "MIT",
   "type": "module",
