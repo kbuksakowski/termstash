@@ -1,5 +1,6 @@
 {
   "name": "termstash",
+  "displayName": "TermStash",
   "version": "0.3.3",
   "description": "Lost a Claude Code session? Ask Claude. It finds the sessions you closed and gives you the command to get back in.",
   "author": {
@@ -13,5 +14,8 @@
     "sessions",
     "resume",
     "history"
-  ]
+  ],
+  "documentationUrl": "https://github.com/kbuksakowski/termstash#readme",
+  "supportUrl": "https://github.com/kbuksakowski/termstash/issues",
+  "privacyPolicyUrl": "https://github.com/kbuksakowski/termstash#privacy"
 }
